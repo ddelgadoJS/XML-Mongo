@@ -1,5 +1,6 @@
 import json
 import xmltodict
+import re
 
 # Taken from stack overflow, code written by Honest Abe.
 # Centers tkinter window.
@@ -12,8 +13,8 @@ def center(win):
     win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
 # Reads and parses an XML file to JSON.
-def parseXMLtoJSON(filePath, collectionName):
-    filePath = updateXML(filePath, collectionName)
+def parseXMLtoJSON(filePath):
+    filePath = updateXML(filePath)
 
     with open(filePath, 'r') as f:
         xmlString = f.read()
@@ -49,6 +50,22 @@ def getLastTag(xmlString):
     else:
         print ("No tag founded")
 
+# Gets NEWID from <REUTERS> attribute.
+# Returns <NEWID> # </NEWID>
+def getNEWID(reutersContent):
+    newid = ""
+    started = False # Checks if started adding attribute NEWID
+
+    # Looks for NEWID starting at index of attribute.
+    for i in range(reutersContent.find("NEWID"), len(reutersContent)):
+        newid += reutersContent[i]
+
+    # Gets value and prepare string
+    newid = "<NEWID>" + newid.split("=")[-1] + "</NEWID>"
+
+    # Returns id without quotes ("").
+    return re.sub('[\"]', '', newid)
+
 def checkDTags(tagContent, openingTag, closingTag):
     # In case there are multiple elements inside tag.
     splittedTagContent = tagContent.split("</D>")
@@ -66,17 +83,9 @@ def checkDTags(tagContent, openingTag, closingTag):
             else:
                 tagContent += openingTag + splittedTagContent[i] + closingTag
 
-    """elif  len(splittedTagContent) == 1 and (
-          openingTag == "<TOPICS>" or openingTag == "<PLACES>" or
-          openingTag == "<PEOPLE>" or openingTag == "<ORGS>" or
-          openingTag == "<EXCHANGES>"):
-          # Because this tags can have multiple fields this must be an array in JSON.
-          tagContent = openingTag + tagContent + closingTag
-          print (tagContent)"""
-
     return tagContent
 
-def updateXML(filePath, collectionName):
+def updateXML(filePath):
     with open(filePath, 'r') as f:
         xmlString = f.read()
 
@@ -109,41 +118,16 @@ def updateXML(filePath, collectionName):
                        tag == "</BODY>" or tag == "</REUTERS>" or
                        tag == "</COLLECTION>" or tag == "</D>"):
 
-                        # COLLECTION case: change name given by user.
-                        if tag == "</COLLECTION>":
-                            tag = '</' + collectionName + '>'
-
-                        elif tag == "</D>":
+                        if tag == "</D>":
                             tagContent += tag
 
-                        """elif tag == "</TITLE>":
-                            # Inside <TITLE> are some weird characters.
-                            # It's necessary to remove them.
-                            tagContent = tagContent[5:]
-
-                        elif tag == "</BODY>":
-                            # Inside <BODY> are some weird characters.
-                            # It's necessary to remove them.
-                            tagContent = tagContent[:-4]
-                        """
-
-                        """elif tag == "</D>":
-                            # <D> CASE, multiple elements inside tag.
-                            # If in original XML is like this:
-                            #   <PLACES><D>el-salvador</D><D>usa</D></PLACES>
-                            # It needs to be like this in simplified:
-                            #   <PLACES>el-salvador</PLACES><PLACES>usa</PLACES>
-
-                            # Checks if openingTag is already in xmlStringSimple.
-                            endingTag = stack[-1][0] + '/' + stack[-1][1:] + stack[-1]
-                            xmlStringSimple += tagContent + endingTag
-                            tagContent = """
-
-                        if tag != "</D>":
+                        else:
                             tagContent = checkDTags(tagContent, stack[-1], tag)
                             xmlStringSimple += tagContent
                             tagContent = ""
 
+                            # If closing tag is already written won't add it.
+                            # This can happens with </D>.
                             if getLastTag(xmlStringSimple) != tag:
                                 xmlStringSimple += tag
 
@@ -151,25 +135,21 @@ def updateXML(filePath, collectionName):
                             stack.pop() # Pops opening tag.
 
                         else:
-                            print ("Opening tag not found: " + tag)
+                            pass
+                            #print ("Opening tag not found: " + tag)
 
                     else:
                         tagContent = ""
-                        print ("Tag not added: " + tag)
+                        #print ("Tag not added: " + tag)
 
                 # First line case.
                 elif tag[1] == '?':
-                    print ("First line ignored.")
+                    pass
+                    #print ("First line ignored.")
 
                 else:
-                    # COLLECTION case: change name given by user.
-                    if tag == "<COLLECTION>":
-                        tag = '<' + collectionName + '>'
-                        xmlStringSimple += tag
-                        stack.append(tag)
-
                     # Update xmlStringSimple
-                    elif (tag == "<DATE>" or tag == "<TOPICS>" or
+                    if (tag == "<DATE>" or tag == "<TOPICS>" or
                        tag == "<PLACES>" or tag == "<PEOPLE>" or
                        tag == "<ORGS>" or tag == "<EXCHANGES>" or
                        tag == "<TEXT>" or tag == "<TITLE>" or
@@ -177,17 +157,18 @@ def updateXML(filePath, collectionName):
                        tag == "<BODY>" or tag == "<REUTERS>" or
                        tag == "<COLLECTION>" or tag == "<D>"):
 
-                        if tag == "<COLLECTION>":
-                           tag = '<' + collectionName + '>'
-
                         if tag != "<D>":
                             xmlStringSimple += tag
                             stack.append(tag)
 
+                            # Getting NEWID attribute.
+                            if tag == "<REUTERS>":
+                                xmlStringSimple += getNEWID(reutersContent)
+                                reutersContent = ""
+
                     else:
                         tagContent = ""
-                        print ("Tag not added: " + tag)
-                #print (stack)
+                        #print ("Tag not added: " + tag)
 
             # Already started parsing tag.
             else:
@@ -218,12 +199,3 @@ def updateXML(filePath, collectionName):
         f.write(xmlStringSimple)
 
     return fileName + "_updated" + ".xml"
-    #parseXMLtoJSON(fileName + "simpleXXX" + ".xml")
-
-    #print(xmlStringSimple)
-
-#updateXML("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-002.xml", "ColeccionPrueba")
-
-#getLastTag("<xmlStringSimple>")
-
-#parseXMLtoJSON("reut2-000.xml")
