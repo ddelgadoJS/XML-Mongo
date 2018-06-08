@@ -60,7 +60,7 @@ def updateXML(filePath, collectionName):
                        tag == "</TEXT>" or tag == "</TITLE>" or
                        tag == "</AUTHOR>" or tag == "</DATELINE>" or
                        tag == "</BODY>" or tag == "</REUTERS>" or
-                       tag == "</COLLECTION>"):
+                       tag == "</COLLECTION>" or tag == "</D>"):
 
                         # COLLECTION case: change name given by user.
                         if tag == "</COLLECTION>":
@@ -72,12 +72,18 @@ def updateXML(filePath, collectionName):
                         elif tag == "</BODY>":
                             tagContent = tagContent[:-4]
 
-                        xmlStringSimple += tagContent
-                        xmlStringSimple += tag
+                        if tag == "</D>":
+                            xmlStringSimple += tagContent + ","
+                            tagContent = ""
+
+                        else:
+                            xmlStringSimple += tagContent
+                            tagContent = ""
+                            xmlStringSimple += tag
 
                         if len(stack) > 0 and stack[-1] == tag[0] + tag[2:]: # Looks for ending tag in stack.
                             stack.pop() # Pops opening tag.
-                            tagContent = ""
+
 
                         else:
                             print ("Error: opening tag not found.")
@@ -104,13 +110,14 @@ def updateXML(filePath, collectionName):
                        tag == "<TEXT>" or tag == "<TITLE>" or
                        tag == "<AUTHOR>" or tag == "<DATELINE>" or
                        tag == "<BODY>" or tag == "<REUTERS>" or
-                       tag == "<COLLECTION>"):
+                       tag == "<COLLECTION>" or tag == "<D>"):
 
                         if tag == "<COLLECTION>":
                            tag = '<' + collectionName + '>'
 
-                        xmlStringSimple += tag
-                        stack.append(tag)
+                        if tag != "<D>":
+                            xmlStringSimple += tag
+                            stack.append(tag)
 
                     else:
                         tagContent = ""
