@@ -29,6 +29,51 @@ def parseXMLtoJSON(filePath):
     with open(fileName + ".json", 'w') as f:
         f.write(jsonString)
 
+# Returns last tag of given string.
+def getLastTag(xmlString):
+    lastTag = ""
+    started = False # Checks if started adding tag '>'
+    for c in reversed(xmlString):
+        if started == False and c == '>':
+            started = True
+            lastTag = c
+
+        elif started == True and c == '<':
+            lastTag = c + lastTag
+            return lastTag
+
+        elif started == True:
+            lastTag = c + lastTag
+    else:
+        print ("No tag founded")
+
+def checkDTags(tagContent, openingTag, closingTag):
+    # In case there are multiple elements inside tag.
+    splittedTagContent = tagContent.split("</D>")
+    if len(splittedTagContent) > 1:
+        tagContent = ""
+        for i in range(0, len(splittedTagContent) - 1):
+            # First element, doesn't need openingTag.
+            if i == 0:
+                tagContent += splittedTagContent[i] + closingTag
+
+            # Last element, doesn't need closingTag.
+            elif i == len(splittedTagContent) - 2:
+                tagContent += openingTag + splittedTagContent[i]
+
+            else:
+                tagContent += openingTag + splittedTagContent[i] + closingTag
+
+    """elif  len(splittedTagContent) == 1 and (
+          openingTag == "<TOPICS>" or openingTag == "<PLACES>" or
+          openingTag == "<PEOPLE>" or openingTag == "<ORGS>" or
+          openingTag == "<EXCHANGES>"):
+          # Because this tags can have multiple fields this must be an array in JSON.
+          tagContent = openingTag + tagContent + closingTag
+          print (tagContent)"""
+
+    return tagContent
+
 def updateXML(filePath, collectionName):
     with open(filePath, 'r') as f:
         xmlString = f.read()
@@ -66,27 +111,47 @@ def updateXML(filePath, collectionName):
                         if tag == "</COLLECTION>":
                             tag = '</' + collectionName + '>'
 
-                        elif tag == "</TITLE>":
+                        elif tag == "</D>":
+                            tagContent += tag
+
+                        """elif tag == "</TITLE>":
+                            # Inside <TITLE> are some weird characters.
+                            # It's necessary to remove them.
                             tagContent = tagContent[5:]
 
                         elif tag == "</BODY>":
+                            # Inside <BODY> are some weird characters.
+                            # It's necessary to remove them.
                             tagContent = tagContent[:-4]
+                        """
 
-                        if tag == "</D>":
-                            xmlStringSimple += tagContent + ","
-                            tagContent = ""
 
-                        else:
+
+                        """elif tag == "</D>":
+                            # <D> CASE, multiple elements inside tag.
+                            # If in original XML is like this:
+                            #   <PLACES><D>el-salvador</D><D>usa</D></PLACES>
+                            # It needs to be like this in simplified:
+                            #   <PLACES>el-salvador</PLACES><PLACES>usa</PLACES>
+
+                            # Checks if openingTag is already in xmlStringSimple.
+                            endingTag = stack[-1][0] + '/' + stack[-1][1:] + stack[-1]
+                            xmlStringSimple += tagContent + endingTag
+                            tagContent = """
+
+                        if tag != "</D>":
+                            tagContent = checkDTags(tagContent, stack[-1], tag)
                             xmlStringSimple += tagContent
                             tagContent = ""
-                            xmlStringSimple += tag
+
+                            if getLastTag(xmlStringSimple) != tag:
+                                xmlStringSimple += tag
 
                         if len(stack) > 0 and stack[-1] == tag[0] + tag[2:]: # Looks for ending tag in stack.
                             stack.pop() # Pops opening tag.
 
-
                         else:
-                            print ("Error: opening tag not found.")
+                            print ("Opening tag not found: " + tag)
 
                     else:
                         tagContent = ""
@@ -130,12 +195,22 @@ def updateXML(filePath, collectionName):
                 if tag == "<REUTERS":
                     reutersContent += i
 
+                # TEXT case: tag with attributes.
+                elif tag == "<TEXT":
+                    if i == '>':
+                        tag += i
+
                 else:
                     tag += i
 
         # Gets content of tag
         else:
-            tagContent += i
+            if i == '&':
+                tagContent += 'and'
+            elif i == '#':
+                tagContent += 'hash'
+            else:
+                tagContent += i
 
     # Creates new simplified XML.
     fileName = ((filePath.split("\\")[-1]).split("."))[0]
@@ -147,6 +222,8 @@ def updateXML(filePath, collectionName):
     print(xmlStringSimple)
 
 
-updateXML("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-000.xml", "ColeccionPrueba")
+updateXML("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-003.xml", "ColeccionPrueba")
 
-#parseXMLtoJSON("reut2-000simpleXXX.xml")
+#getLastTag("<xmlStringSimple>")
+
+#parseXMLtoJSON("reut2-000.xml")
