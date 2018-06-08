@@ -26,8 +26,8 @@ xmlPath.pack(side = "right", padx = 5, pady = 5)
 collectionName = Entry(collectionFrame, font = "Helvetica 12")
 collectionName.pack(side = "right", padx = 5, pady = 10)
 
-xmlPathVar.set("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-000-simple.xml")
+#xmlPathVar.set("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-000.xml")
 
-Button(bottomFrame, text = "Cargar", font = "Helvetica 12", command = lambda: Funs.parseXMLtoJSON(xmlPath.get())).pack(side = "bottom", padx = 10, pady = 10)
+Button(bottomFrame, text = "Cargar", font = "Helvetica 12", command = lambda: Funs.parseXMLtoJSON(xmlPath.get(), collectionName.get())).pack(side = "bottom", padx = 10, pady = 10)
 
 win.mainloop()

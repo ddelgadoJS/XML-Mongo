@@ -12,7 +12,9 @@ def center(win):
     win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
 # Reads and parses an XML file to JSON.
-def parseXMLtoJSON(filePath):
+def parseXMLtoJSON(filePath, collectionName):
+    filePath = updateXML(filePath, collectionName)
+
     with open(filePath, 'r') as f:
         xmlString = f.read()
 
@@ -125,8 +127,6 @@ def updateXML(filePath, collectionName):
                             tagContent = tagContent[:-4]
                         """
 
-
-
                         """elif tag == "</D>":
                             # <D> CASE, multiple elements inside tag.
                             # If in original XML is like this:
@@ -214,15 +214,15 @@ def updateXML(filePath, collectionName):
 
     # Creates new simplified XML.
     fileName = ((filePath.split("\\")[-1]).split("."))[0]
-    with open(fileName + "simpleXXX" + ".xml", 'w') as f:
+    with open(fileName + "_updated" + ".xml", 'w') as f:
         f.write(xmlStringSimple)
 
-    parseXMLtoJSON(fileName + "simpleXXX" + ".xml")
+    return fileName + "_updated" + ".xml"
+    #parseXMLtoJSON(fileName + "simpleXXX" + ".xml")
 
-    print(xmlStringSimple)
+    #print(xmlStringSimple)
 
-
-updateXML("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-003.xml", "ColeccionPrueba")
+#updateXML("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-002.xml", "ColeccionPrueba")
 
 #getLastTag("<xmlStringSimple>")
 
