@@ -1,10 +1,11 @@
 from tkinter import *
-import Functions as Funs
+import Functions as Funcs
+import Parser as Parser
 
 win = Tk()
 win.title("Bases de Datos 2 - Proyecto 3")
 win.geometry("800x185")
-Funs.center(win)
+Funcs.center(win)
 
 # Window frames
 frame = Frame(win)
@@ -26,8 +27,9 @@ collectionName = Entry(collectionFrame, font = "Helvetica 12", width = 60)
 xmlPath.pack(side = "right", padx = 5, pady = 5)
 collectionName.pack(side = "right", padx = 5, pady = 10)
 
+# Default text for test purposes.
 xmlPathVar.set("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-000.xml")
 
-Button(bottomFrame, text = "Cargar", font = "Helvetica 12", command = lambda: Funs.parseXMLtoJSON(xmlPath.get())).pack(side = "bottom", padx = 10, pady = 10)
+Button(bottomFrame, text = "Cargar", font = "Helvetica 12", command = lambda: Parser.parseXMLtoJSON(xmlPath.get())).pack(side = "bottom", padx = 10, pady = 10)
 
 win.mainloop()
