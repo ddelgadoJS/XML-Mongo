@@ -16,8 +16,8 @@ def insertDocument(database, collectionName, document):
 
 # Process petition from Main.py
 # Receives directory path containing XML files.
-def processPetition(directoryPath, collectionName, databaseName):
-    db = connectMongoDB(databaseName = databaseName)
+def processPetition(directoryPath, collectionName, databaseName, host, port):
+    db = connectMongoDB(databaseName = databaseName, host = host, port = port)
 
     # Generates list of XML files.
     xmlFiles = [f for f in listdir(directoryPath) if isfile(join(directoryPath, f))]
