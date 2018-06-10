@@ -14,14 +14,10 @@ def connectMongoDB(databaseName = 'Proyecto3', host = 'localhost', port = 27017)
 def insertDocument(database, collectionName, document):
     return database[collectionName].insert_one(document).inserted_id
 
-#
-def getDocument(collection, documentId):
-    return collection.find('{_id: ObjectId(documentId)}')
-
 # Process petition from Main.py
 # Receives directory path containing XML files.
-def processPetition(directoryPath, collectionName):
-    db = connectMongoDB()
+def processPetition(directoryPath, collectionName, databaseName):
+    db = connectMongoDB(databaseName = databaseName)
 
     # Generates list of XML files.
     xmlFiles = [f for f in listdir(directoryPath) if isfile(join(directoryPath, f))]
