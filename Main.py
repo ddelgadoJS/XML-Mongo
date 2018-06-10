@@ -11,7 +11,6 @@ win.title("Bases de Datos 2 - Proyecto 3")
 win.geometry("800x340")
 Funcs.center(win)
 
-# Window frames
 frame = Frame(win)
 xmlFrame = Frame(win)
 collectionFrame = Frame(win)
@@ -28,7 +27,6 @@ hostFrame.pack(side = "top")
 portFrame.pack(side = "top")
 bottomFrame.pack(side = "top")
 
-# Test purposes
 directoryPathVar = StringVar()
 collectionNameVar = StringVar()
 databaseNameVar = StringVar()
@@ -54,17 +52,12 @@ databaseName.pack(side = "left", padx = 17, pady = 10)
 host.pack(side = "left", padx = 10, pady = 10)
 portNumber.pack(side = "left", padx = 17, pady = 10)
 
-# Default text for test purposes.
-#directoryPathVar.set("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reuters21578")
 collectionNameVar.set("ColeccionPrueba")
 databaseNameVar.set("Proyecto3")
 hostVar.set("localhost")
 portNumberVar.set(27017)
 
-Button(bottomFrame, text = "Cargar", font = "Helvetica 12",
-       command = lambda: Conn.processPetition(directoryPath.get(), collectionName.get(), databaseName.get(), host.get(), int(portNumber.get()))
-      ).pack(side = "left", padx = 0, pady = 15)
-Button(bottomFrame, text = "Buscar directorio", font = "Helvetica 12",
-       command = lambda: askDirectory(directoryPathVar)).pack(side = "left", padx = 25, pady = 15)
+Button(bottomFrame, text = "Cargar", font = "Helvetica 12", command = lambda: Conn.processPetition(directoryPath.get(), collectionName.get(), databaseName.get(), host.get(), int(portNumber.get()))).pack(side = "left", padx = 0, pady = 15)
+Button(bottomFrame, text = "Buscar directorio", font = "Helvetica 12", command = lambda: askDirectory(directoryPathVar)).pack(side = "left", padx = 25, pady = 15)
 
 win.mainloop()
