@@ -18,6 +18,8 @@ def parseXMLtoJSON(filePath):
     with open(fileName + ".json", 'w') as f:
         f.write(jsonString)
 
+    deleteCollectionTag(fileName)
+
 # Receives XML string.
 # Returns last XML tag of given string.
 # If there is no tag, prints an error and returns None
@@ -85,6 +87,20 @@ def checkDTags(tagContent, openingTag, closingTag):
                 tagContent += openingTag + splittedTagContent[i] + closingTag
 
     return tagContent
+
+# Deletes "COLLECTION" line and respective ending parenthesis.
+# This is for the appropriate insert of document to MongoDB.
+def deleteCollectionTag(fileName):
+    with open(fileName + ".json", 'r') as f:
+        jsonLines = f.readlines()
+
+    enhancedJsonString = ""
+    for i in range (0, len(jsonLines)):
+        if i != 1 and i != len(jsonLines) - 2:
+            enhancedJsonString += jsonLines[i]
+
+    with open(fileName + ".json", 'w') as f:
+        f.write(enhancedJsonString)
 
 # Receives path to innacurate XML file.
 # Returns path to enhanced XML file (makes a new one).
