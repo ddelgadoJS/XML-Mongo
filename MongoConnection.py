@@ -1,53 +1,41 @@
-from pymongo import *
-import ast
+import Parser as Parser
 import json
+from pymongo import *
+from os import listdir
+from os.path import isfile, join
 
 # Returns connection to desired database.
-def connectMongoDB(host = 'localhost', port = 27017):
-    return MongoClient(host, port).proyect3db
+def connectMongoDB(databaseName = 'Proyecto3', host = 'localhost', port = 27017):
+    return MongoClient(host, port)[databaseName]
 
 # Inserts document into collection.
 # Returns inserted document id.
-def insertDocument(collection, document):
-    return collection.insert_one(document).inserted_id
+# Example: insertDocument(database, 'testCollection', json.loads(jsonString))
+def insertDocument(database, collectionName, document):
+    return database[collectionName].insert_one(document).inserted_id
 
 #
 def getDocument(collection, documentId):
     return collection.find('{_id: ObjectId(documentId)}')
 
+# Process petition from Main.py
+# Receives directory path containing XML files.
+def processPetition(directoryPath, collectionName):
+    db = connectMongoDB()
 
-db = connectMongoDB()
+    # Generates list of XML files.
+    xmlFiles = [f for f in listdir(directoryPath) if isfile(join(directoryPath, f))]
 
-collection = db.testCollection
+    # Iterating over original XML files.
+    for file in xmlFiles:
+        Parser.parseXMLtoJSON(directoryPath, file)
 
-print(collection.find({}))
+    # Generates list of JSON files.
+    jsonFiles = [f for f in listdir(directoryPath + "\\JSONs") if isfile(join(directoryPath + "\\JSONs", f))]
 
-for doc in collection.find({}):
-    print(doc)
+    # Iterating over generated JSON files and inserting in MongoDB
+    for file in jsonFiles:
+        with open(directoryPath + "\\JSONs\\" + file, 'r') as f:
+            jsonString = f.read()
 
-with open("C:\\Users\\Daniel\\Documents\\GitKraken\\XMLtoMongo\\reut2-000_enhanced.json", 'r') as f:
-    xmlString = f.read()
-
-    #json_acceptable_string = xmlString.replace("'", "\"")
-
-    #insertDocument(collection, json.loads(xmlString))
-
-    #collection.insert_many(ast.literal_eval(xmlString))
-
-#print (getDocument(collection, "5b1c64c35abdc121c804fb86"))
-
-print (collection.count())
-
-#insertDocument(collection, {"author": "Mike", "text": "My first blog post!", "tags": ["mongodb", "python", "pymongo"]})
-
-print (collection.count())
-
-#post = {"author": "Mike",
-#        "text": "My first blog post!",
-#        "tags": ["mongodb", "python", "pymongo"]}
-
-#post_id = db.testCollection.insert_one(post).inserted_id
-
-print (db)
-
-#print (post_id)
+        insertDocument(db, collectionName, json.loads(jsonString))
