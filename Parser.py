@@ -3,20 +3,22 @@ import xmltodict
 import re
 
 # Reads and parses an XML file to JSON.
-# Code written by Alex.
+# Code partially written by Alex.
 # tripsintech.com/xml-to-json-python-script-also-json-to-xml/
-def parseXMLtoJSON(filePath):
-    filePath = enhanceXML(filePath)
+def parseXMLtoJSON(directoryPath, fileName):
+    enhancedFilePath = enhanceXML(directoryPath, fileName)
 
-    with open(filePath, 'r') as f:
+    with open(enhancedFilePath, 'r') as f:
         xmlString = f.read()
 
     jsonString = json.dumps(xmltodict.parse(xmlString), indent=4)
 
-    fileName = ((filePath.split("\\")[-1]).split("."))[0]
+    fileName = ((enhancedFilePath.split("\\")[-1]).split(".")[0]).split("_")[0]
 
-    with open(fileName + ".json", 'w') as f:
+    with open(directoryPath + "\\JSONs\\" + fileName + ".json", 'w') as f:
         f.write(jsonString)
+
+    deleteCollectionTag(directoryPath + "\\JSONs\\" + fileName)
 
 # Receives XML string.
 # Returns last XML tag of given string.
@@ -86,10 +88,24 @@ def checkDTags(tagContent, openingTag, closingTag):
 
     return tagContent
 
+# Deletes "COLLECTION" line and respective ending parenthesis.
+# This is for the appropriate insert of document to MongoDB.
+def deleteCollectionTag(fileName):
+    with open(fileName + ".json", 'r') as f:
+        jsonLines = f.readlines()
+
+    enhancedJsonString = ""
+    for i in range (0, len(jsonLines)):
+        if i != 1 and i != len(jsonLines) - 2:
+            enhancedJsonString += jsonLines[i]
+
+    with open(fileName + ".json", 'w') as f:
+        f.write(enhancedJsonString)
+
 # Receives path to innacurate XML file.
 # Returns path to enhanced XML file (makes a new one).
-def enhanceXML(innacurateXMLPath):
-    with open(innacurateXMLPath, 'r') as f:
+def enhanceXML(directoryPath, innacurateXMLPath):
+    with open(directoryPath + "\\" + innacurateXMLPath, 'r') as f:
         innacurateXMLString = f.read()
 
     stack = []
@@ -212,7 +228,7 @@ def enhanceXML(innacurateXMLPath):
 
     # Creates new enhanced XML file.
     innacurateFileName = ((innacurateXMLPath.split("\\")[-1]).split("."))[0]
-    with open(innacurateFileName + "_enhanced" + ".xml", 'w') as f:
+    with open(directoryPath + "\\EnhancedXMLs\\" + innacurateFileName + "_enhanced" + ".xml", 'w') as f:
         f.write(enhancedXMLString)
 
-    return innacurateFileName + "_enhanced" + ".xml"
+    return directoryPath + "\\EnhancedXMLs\\" + innacurateFileName + "_enhanced" + ".xml"
