@@ -10,14 +10,6 @@ import MongoConnection as Conn
 def parseXMLtoJSON(database, collectionName, enhancedXMLString):
     jsonString = json.dumps(xmltodict.parse(enhancedXMLString).get("REUTERS"), indent=4)
 
-    """
-    with open(fileName + ".json", 'w') as f:
-        f.write(jsonString)
-
-    with open(fileName + ".json", 'r') as f:
-        jsonString = f.read()
-    """
-
     Conn.insertDocument(database, collectionName, json.loads(jsonString))
 
 # Receives XML string.
