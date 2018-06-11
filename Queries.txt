@@ -1,0 +1,4 @@
+db.NOMBRECOLECCION.find({TOPICS: "sugar"}, {NEWID:1, "TEXT.TITLE":1, _id:0});
+db.NOMBRECOLECCION.find({PLACES: "indonesia"}, {NEWID:1, "TEXT.TITLE":1, _id:0});
+
+db.NOMBRECOLECCION.find({"TEXT.BODY" : /.*coffee.*/i, "TEXT.BODY":/.*colombia*/i}, {NEWID:1, "TEXT.TITLE":1, _id:0});

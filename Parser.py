@@ -1,6 +1,7 @@
 import json
 import xmltodict
 import re
+import os
 import MongoConnection as Conn
 
 # Reads and parses an XML string to a JSON string, then inserts it to MongoDB.
@@ -8,6 +9,14 @@ import MongoConnection as Conn
 # tripsintech.com/xml-to-json-python-script-also-json-to-xml/
 def parseXMLtoJSON(database, collectionName, enhancedXMLString):
     jsonString = json.dumps(xmltodict.parse(enhancedXMLString).get("REUTERS"), indent=4)
+
+    """
+    with open(fileName + ".json", 'w') as f:
+        f.write(jsonString)
+
+    with open(fileName + ".json", 'r') as f:
+        jsonString = f.read()
+    """
 
     Conn.insertDocument(database, collectionName, json.loads(jsonString))
 
@@ -102,7 +111,7 @@ def enhanceXML(database, collectionName, directoryPath, innacurateXMLPath):
         innacurateXMLString = f.read()
 
     stack = []
-    tag = tagContent = reutersContent = enhancedXMLString = ""
+    tag = tagContent = reutersContent = enhancedXMLString = completeEnhancedXMLString = ""
 
     for token in innacurateXMLString:
         # Checks that stack has at least one element to avoid error on next condition.
@@ -148,6 +157,7 @@ def enhanceXML(database, collectionName, directoryPath, innacurateXMLPath):
                             # If end of article, insert it to database.
                             if tag == "</REUTERS>":
                                 parseXMLtoJSON(database, collectionName, enhancedXMLString)
+                                completeEnhancedXMLString += enhancedXMLString
                                 enhancedXMLString = ""
 
                         # Checks that stack has at least one element
@@ -223,3 +233,15 @@ def enhanceXML(database, collectionName, directoryPath, innacurateXMLPath):
             # Parses normal token.
             else:
                 tagContent += token
+
+    if not os.path.exists("JSONs"):
+        os.makedirs("JSONs")
+
+    # Adds <COLLECTION> tags to avoid error when parsing to JSON.
+    completeEnhancedXMLString = "<COLLECTION>" + completeEnhancedXMLString + "</COLLECTION>"
+    jsonString = json.dumps(xmltodict.parse(completeEnhancedXMLString), indent=4)
+
+    # Creates JSON file of enhanced XML file.
+    innacurateFileName = ((innacurateXMLPath.split("\\")[-1]).split("."))[0]
+    with open("JSONs\\" + innacurateFileName + ".json", 'w') as f:
+        f.write(jsonString)
