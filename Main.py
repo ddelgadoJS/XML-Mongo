@@ -57,7 +57,7 @@ databaseNameVar.set("Proyecto3")
 hostVar.set("localhost")
 portNumberVar.set(27017)
 
-Button(bottomFrame, text = "Cargar", font = "Helvetica 12", command = lambda: Conn.processPetition(directoryPath.get(), collectionName.get(), databaseName.get(), host.get(), int(portNumber.get()))).pack(side = "left", padx = 0, pady = 15)
+Button(bottomFrame, text = "Cargar", font = "Helvetica 12", command = lambda: Conn.processPetition(win, directoryPath.get(), collectionName.get(), databaseName.get(), host.get(), int(portNumber.get()))).pack(side = "left", padx = 0, pady = 15)
 Button(bottomFrame, text = "Buscar directorio", font = "Helvetica 12", command = lambda: askDirectory(directoryPathVar)).pack(side = "left", padx = 25, pady = 15)
 
 win.mainloop()

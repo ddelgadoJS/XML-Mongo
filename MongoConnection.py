@@ -3,6 +3,9 @@ import json
 from pymongo import *
 from os import listdir
 from os.path import isfile, join
+from tkinter import messagebox
+from tkinter import *
+
 
 # Returns connection to desired database.
 def connectMongoDB(databaseName = 'Proyecto3', host = 'localhost', port = 27017):
@@ -16,22 +19,17 @@ def insertDocument(database, collectionName, document):
 
 # Process petition from Main.py
 # Receives directory path containing XML files.
-def processPetition(directoryPath, collectionName, databaseName, host, port):
+def processPetition(win, directoryPath, collectionName, databaseName, host, port):
     db = connectMongoDB(databaseName = databaseName, host = host, port = port)
 
     # Generates list of XML files.
     xmlFiles = [f for f in listdir(directoryPath) if isfile(join(directoryPath, f))]
 
+    messagebox.showinfo("Process", "Por favor, presione el botón 'OK' y espere unos segundos.")
+
     # Iterating over original XML files.
+    fileCount = 0
     for file in xmlFiles:
-        Parser.parseXMLtoJSON(directoryPath, file)
+        Parser.enhanceXML(db, collectionName, directoryPath, file)
 
-    # Generates list of JSON files.
-    jsonFiles = [f for f in listdir(directoryPath + "\\JSONs") if isfile(join(directoryPath + "\\JSONs", f))]
-
-    # Iterating over generated JSON files and inserting in MongoDB
-    for file in jsonFiles:
-        with open(directoryPath + "\\JSONs\\" + file, 'r') as f:
-            jsonString = f.read()
-
-        insertDocument(db, collectionName, json.loads(jsonString))
+    messagebox.showinfo("Process", "Se han cargado los archivos exitosamente.")

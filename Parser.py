@@ -1,24 +1,15 @@
 import json
 import xmltodict
 import re
+import MongoConnection as Conn
 
-# Reads and parses an XML file to JSON.
+# Reads and parses an XML string to a JSON string, then inserts it to MongoDB.
 # Code partially written by Alex.
 # tripsintech.com/xml-to-json-python-script-also-json-to-xml/
-def parseXMLtoJSON(directoryPath, fileName):
-    enhancedFilePath = enhanceXML(directoryPath, fileName)
+def parseXMLtoJSON(database, collectionName, enhancedXMLString):
+    jsonString = json.dumps(xmltodict.parse(enhancedXMLString).get("REUTERS"), indent=4)
 
-    with open(enhancedFilePath, 'r') as f:
-        xmlString = f.read()
-
-    jsonString = json.dumps(xmltodict.parse(xmlString), indent=4)
-
-    fileName = ((enhancedFilePath.split("\\")[-1]).split(".")[0]).split("_")[0]
-
-    with open(directoryPath + "\\JSONs\\" + fileName + ".json", 'w') as f:
-        f.write(jsonString)
-
-    deleteCollectionTag(directoryPath + "\\JSONs\\" + fileName)
+    Conn.insertDocument(database, collectionName, json.loads(jsonString))
 
 # Receives XML string.
 # Returns last XML tag of given string.
@@ -104,7 +95,9 @@ def deleteCollectionTag(fileName):
 
 # Receives path to innacurate XML file.
 # Returns path to enhanced XML file (makes a new one).
-def enhanceXML(directoryPath, innacurateXMLPath):
+def enhanceXML(database, collectionName, directoryPath, innacurateXMLPath):
+    articlesCount = 0 # Variable to increment the file name.
+
     with open(directoryPath + "\\" + innacurateXMLPath, 'r') as f:
         innacurateXMLString = f.read()
 
@@ -133,7 +126,7 @@ def enhanceXML(directoryPath, innacurateXMLPath):
                         tag == "</TEXT>" or tag == "</TITLE>" or
                         tag == "</AUTHOR>" or tag == "</DATELINE>" or
                         tag == "</BODY>" or tag == "</REUTERS>" or
-                        tag == "</COLLECTION>" or tag == "</D>"):
+                        tag == "</D>"):
 
                         # This means this tagContent needs to be processed.
                         if tag == "</D>":
@@ -151,6 +144,11 @@ def enhanceXML(directoryPath, innacurateXMLPath):
                             # This can happens with </D>.
                             if getLastTag(enhancedXMLString) != tag:
                                 enhancedXMLString += tag
+
+                            # If end of article, insert it to database.
+                            if tag == "</REUTERS>":
+                                parseXMLtoJSON(database, collectionName, enhancedXMLString)
+                                enhancedXMLString = ""
 
                         # Checks that stack has at least one element
                         #  to avoid error on next condition.
@@ -182,7 +180,7 @@ def enhanceXML(directoryPath, innacurateXMLPath):
                         tag == "<TEXT>" or tag == "<TITLE>" or
                         tag == "<AUTHOR>" or tag == "<DATELINE>" or
                         tag == "<BODY>" or tag == "<REUTERS>" or
-                        tag == "<COLLECTION>" or tag == "<D>"):
+                        tag == "<D>"):
 
                         # Process as a normal tag, without <D>
                         if tag != "<D>":
@@ -225,10 +223,3 @@ def enhanceXML(directoryPath, innacurateXMLPath):
             # Parses normal token.
             else:
                 tagContent += token
-
-    # Creates new enhanced XML file.
-    innacurateFileName = ((innacurateXMLPath.split("\\")[-1]).split("."))[0]
-    with open(directoryPath + "\\EnhancedXMLs\\" + innacurateFileName + "_enhanced" + ".xml", 'w') as f:
-        f.write(enhancedXMLString)
-
-    return directoryPath + "\\EnhancedXMLs\\" + innacurateFileName + "_enhanced" + ".xml"
