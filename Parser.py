@@ -4,7 +4,6 @@ import re
 import os
 import MongoConnection as Conn
 
-# Reads and parses an XML string to a JSON string, then inserts it to MongoDB.
 # Code partially written by Alex.
 # tripsintech.com/xml-to-json-python-script-also-json-to-xml/
 def parseXMLtoJSON(database, collectionName, enhancedXMLString):
@@ -12,7 +11,6 @@ def parseXMLtoJSON(database, collectionName, enhancedXMLString):
 
     Conn.insertDocument(database, collectionName, json.loads(jsonString))
 
-# Receives XML string.
 # Returns last XML tag of given string.
 # If there is no tag, prints an error and returns None
 def getLastTag(xmlString):

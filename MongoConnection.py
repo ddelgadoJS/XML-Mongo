@@ -4,18 +4,14 @@ from pymongo import *
 from os import listdir
 from os.path import isfile, join
 from tkinter import messagebox
-from tkinter import *
-
 
 # Returns connection to desired database.
 def connectMongoDB(databaseName = 'Proyecto3', host = 'localhost', port = 27017):
     return MongoClient(host, port)[databaseName]
 
-# Inserts document into collection.
-# Returns inserted document id.
 # Example: insertDocument(database, 'testCollection', json.loads(jsonString))
 def insertDocument(database, collectionName, document):
-    return database[collectionName].insert_one(document).inserted_id
+    database[collectionName].insert_one(document).inserted_id
 
 # Process petition from Main.py
 # Receives directory path containing XML files.
