@@ -1,7 +1,6 @@
-# Centers tkinter window in screen.
 # Code written by Honest Abe.
 # stackoverflow.com/questions/3352918/how-to-center-a-window-on-the-screen-in-tkinter
-def center(win):
+def centerWindow(win):
     win.update_idletasks()
     width = win.winfo_width()
     height = win.winfo_height()

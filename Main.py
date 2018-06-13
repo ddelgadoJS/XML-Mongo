@@ -9,7 +9,7 @@ def askDirectory(directoryPathVar):
 win = Tk()
 win.title("Bases de Datos 2 - Proyecto 3")
 win.geometry("800x340")
-Funcs.center(win)
+Funcs.centerWindow(win)
 
 frame = Frame(win)
 xmlFrame = Frame(win)
